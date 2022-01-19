@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of roper is to accurately detect differential expressed genes in the presence of unknown forms of additional variation that remains in the RNA-Seq read count.
+The goal of roper is to accurately detect differentially expressed genes in the presence of unknown forms of additional variation that remains in the RNA-Seq read count.
 
 ## Installation
 

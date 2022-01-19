@@ -6,7 +6,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of roper is to accurately detect differential expressed genes
+The goal of roper is to accurately detect differentially expressed genes
 in the presence of unknown forms of additional variation that remains in
 the RNA-Seq read count.
 
