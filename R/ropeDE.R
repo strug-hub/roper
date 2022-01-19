@@ -1,12 +1,23 @@
-# Main function: RoPE_fast ---------------------------------------------------------------
-geneDE_fast <- function(datmat, X_model, x_PI_idx) {
-  require(methods)
-  require(edgeR)
-  # Use external mglm fit to save time
-  # induced parameters
-  Ni.adj <- calcNormFactors(datmat) * colSums(datmat)
+#' Robust profile likelihood-based differential expression analysis
+#'
+#' Fit a robust profile likelihood ratio test for a working Poisson log-linear model.
+#'
+#' @param datmat A matrix of filtered RNA-seq counts.
+#' @param X_model A numerical design matrix contains DE experiment group (parameter of interest) and other covariates
+#' @param x_PI_idx An integer indicates the column index of the parameter of interest, usually the DE experiment group.
+#' @return A data frame with columns contain the DE result of log fold change, unadjusted and adjusted log likelihood ratio, adjustment factors, p-values and Benjamini & Hochberg adjusted p-values.
+#' @export
+#' @importFrom edgeR calcNormFactors mglmLevenberg
+#' @importFrom stats dpois p.adjust pchisq
+#' @examples
+#' count <- matrix(rnbinom(n = 5e4, mu = 100, size = 1 / 0.5), ncol = 50)
+#' mod <- model.matrix(~ gl(n = 2, k = 25))
+#' res <- roper(datmat = count, X_model = mod, x_PI_idx = dim(mod)[2])
+#' res
+roper <- function(datmat, X_model, x_PI_idx) {
+  Ni.adj <- edgeR::calcNormFactors(datmat) * colSums(datmat)
   fit.mglm <-
-    mglmLevenberg(datmat,
+    edgeR::mglmLevenberg(datmat,
       X_model,
       dispersion = 0,
       offset = log(Ni.adj)
@@ -36,7 +47,7 @@ geneDE_fast <- function(datmat, X_model, x_PI_idx) {
 
   for (ngi in (1:nrow(datmat))[rowSums(datmat) > 0]) {
     fit.p.i <-
-      mglmLevenberg(
+      edgeR::mglmLevenberg(
         t(as.matrix(datmat[ngi, ])),
         X_reduced,
         dispersion = 0,
@@ -52,7 +63,7 @@ geneDE_fast <- function(datmat, X_model, x_PI_idx) {
 
   for (ngi in (1:nrow(datmat))[rowSums(datmat) > 0]) {
     fit.p.i <-
-      mglmLevenberg(t(as.matrix(datmat[ngi, ])),
+      edgeR::mglmLevenberg(t(as.matrix(datmat[ngi, ])),
         X_reduced,
         dispersion = 0,
         offset = log(Ni.adj)
@@ -84,6 +95,6 @@ geneDE_fast <- function(datmat, X_model, x_PI_idx) {
     adj = A.est / B.est,
     adj_logLR = adj_logLR,
     pvals = pvals,
-    q = padj
+    padj = padj
   )
 }
