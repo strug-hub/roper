@@ -12,9 +12,9 @@
 #' @examples
 #' count <- matrix(rnbinom(n = 5e4, mu = 100, size = 1 / 0.5), ncol = 50)
 #' mod <- model.matrix(~ gl(n = 2, k = 25))
-#' res <- roper(datmat = count, X_model = mod, x_PI_idx = dim(mod)[2])
+#' res <- rope(datmat = count, X_model = mod, x_PI_idx = dim(mod)[2])
 #' res
-roper <- function(datmat, X_model, x_PI_idx) {
+rope <- function(datmat, X_model, x_PI_idx) {
   Ni.adj <- edgeR::calcNormFactors(datmat) * colSums(datmat)
   fit.mglm <-
     edgeR::mglmLevenberg(datmat,
