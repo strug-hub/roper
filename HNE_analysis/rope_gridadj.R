@@ -1,17 +1,30 @@
+# Robust adjustment factors -----------------------------------------------
+A <-
+  function(x, pred) {
+    sum(pred * x ^ 2) - ((sum(pred * x)) ^ 2) / (sum(pred))
+  }
+B <-
+  function(x, pred, res) {
+    sum((res ^ 2) * (x - (sum(pred * x)) / (sum(pred))) ^ 2)
+  }
+
+
 #' Rope alternative full likelihood
 #'
 #' computing adj.profile likelihood over auto-search grid
 rope_gridadj <- function(datmat, ngi, X_model, accuracy = 1000) {
 
-  # Define parallel actions
+  require(foreach)
 
+  # Define parallel actions
 
   Ni.adj <- edgeR::calcNormFactors(datmat) * colSums(datmat)
   fit.mglm <-
     edgeR::mglmLevenberg(datmat,
-                  X_model,
-                  dispersion = 0,
-                  offset = log(Ni.adj))
+      X_model,
+      dispersion = 0,
+      offset = log(Ni.adj)
+    )
 
   ygi <- as.numeric(datmat[ngi, ])
   if (sum(ygi) == 0) {
@@ -30,9 +43,9 @@ rope_gridadj <- function(datmat, ngi, X_model, accuracy = 1000) {
     X_reduced <- X_model[, -dim(X_model)[2]]
 
     # Define function parameters
-    profile.theta = "x_PI"
+    profile.theta <- "x_PI"
     theta.off <- data_w[, names(data_w) == profile.theta]
-    offset.glm = "Ni.adj"
+    offset.glm <- "Ni.adj"
     glm.off <- data_w[, names(data_w) == offset.glm]
 
     muyhat <- fit.mglm$fitted.values[ngi, ]
@@ -74,8 +87,8 @@ rope_gridadj <- function(datmat, ngi, X_model, accuracy = 1000) {
       beta_grid <-
         sort(c(
           seq(
-            pre_mle - mul.base * se_l * (2 ^ mul.fac),
-            pre_mle + mul.base * se_l * (2 ^ mul.fac),
+            pre_mle - mul.base * se_l * (2^mul.fac),
+            pre_mle + mul.base * se_l * (2^mul.fac),
             length.out = accuracy
           ),
           pre_mle
@@ -114,15 +127,15 @@ rope_gridadj <- function(datmat, ngi, X_model, accuracy = 1000) {
           log = T
         ))
 
-      MIN_0  <- min(c(b.l - pre.mm, b.r - pre.mm) * (A.est / B.est))
+      MIN_0 <- min(c(b.l - pre.mm, b.r - pre.mm) * (A.est / B.est))
       mul.fac <- mul.fac + 1
     }
 
     beta_grid <-
       sort(c(
         seq(
-          pre_mle - mul.base * se_l * (2 ^ mul.fac),
-          pre_mle + mul.base * se_l * (2 ^ mul.fac),
+          pre_mle - mul.base * se_l * (2^mul.fac),
+          pre_mle + mul.base * se_l * (2^mul.fac),
           length.out = accuracy
         ),
         pre_mle,
@@ -137,23 +150,25 @@ rope_gridadj <- function(datmat, ngi, X_model, accuracy = 1000) {
 
     ##
     log.lik.t1 <-
-      foreach(i = icount(length(beta_grid)),
-              .packages = 'edgeR',
-              .combine = c) %dopar% {
-                pi <- beta_grid[i]
-                fit.p.i <-
-                  edgeR::mglmLevenberg(
-                    t(as.matrix(datmat[ngi, ])),
-                    X_reduced,
-                    dispersion = 0,
-                    offset = (pi * theta.off + log(glm.off))
-                  )
-                sum(dpois(
-                  x = datmat[ngi, ],
-                  lambda = fit.p.i$fitted.values[1, ],
-                  log = T
-                ))
-              }
+      foreach(
+        i = iterators::icount(length(beta_grid)),
+        .packages = "edgeR",
+        .combine = c
+      ) %dopar% {
+        pi <- beta_grid[i]
+        fit.p.i <-
+          edgeR::mglmLevenberg(
+            t(as.matrix(datmat[ngi, ])),
+            X_reduced,
+            dispersion = 0,
+            offset = (pi * theta.off + log(glm.off))
+          )
+        sum(dpois(
+          x = datmat[ngi, ],
+          lambda = fit.p.i$fitted.values[1, ],
+          log = T
+        ))
+      }
 
     ### Create output
     theta <- beta_grid[is.na(log.lik.t1) != 1]
