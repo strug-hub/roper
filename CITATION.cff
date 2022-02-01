@@ -1,0 +1,20 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  roper: a robust profile likelihood method for
+  differential gene expression analysis
+message: 'If you use this software, please cite it as below.'
+type: software
+authors:
+  - given-names: Lehang
+    family-names: Zhong
+    email: lehang.zhong@mail.utoronto.ca
+    orcid: 'https://orcid.org/0000-0003-0926-1357'
+  - given-names: Lisa
+    family-names: Strug
+url: 'https://github.com/strug-hub/roper'
+license: GPL-3.0
+version: 1.0.0
+date-released: '2022-02-01'
