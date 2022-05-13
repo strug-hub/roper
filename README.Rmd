@@ -35,8 +35,10 @@ This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
 library(roper)
+set.seed(123)
 count <- matrix(rnbinom(n = 5e4, mu = 100, size = 1 / 0.5), ncol = 50)
 mod <- model.matrix(~ gl(n = 2, k = 25))
 res <- rope(datmat = count, X_model = mod, x_PI_idx = dim(mod)[2])
+head(res)
 ```
 
